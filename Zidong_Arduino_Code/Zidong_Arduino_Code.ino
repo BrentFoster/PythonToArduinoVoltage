@@ -7,7 +7,7 @@ const int voltagepin = 6;    // the number of the pin for adjusting voltage
 // Variables will change:
 int buttonState = 0;              // variable for reading the pushbutton status
 int devicerunning = 0;            // variable for reading the pushbutton status
-float InitialVoltage = 5;         // variable for starting voltage value
+float InitialVoltage = 0;         // variable for starting voltage value
 float NewVoltage = InitialVoltage;
 float PythonIntensity = 90;
 float SPIntensity = 50;
@@ -63,19 +63,20 @@ void loop() {
       digitalWrite(ledPin, LOW);
       }
           
-    delay(500);
+    delay(100);
     }
 
     if (devicerunning == 1){
 
     // Read New Voltage Value from Python
     
-    Serial.print('\n');
-    Serial.print("Getting new voltage from Python...");
+//    Serial.print('\n');
+//    Serial.print("Getting new voltage from Python...");
   
     String readString; // Clear this variable now 
-    for (int i=0; i <= 5; i++){
+    for (int i=0; i <= 2; i++){
       readString = GetNewVoltage(readString);
+//      delay(50);
     } 
     Serial.println(readString);
     
@@ -92,7 +93,7 @@ void loop() {
     // Adjust voltage in pin
     analogWrite(voltagepin,51*NewVoltage);
 
-//    delay(1000);
+
 
     
     }
