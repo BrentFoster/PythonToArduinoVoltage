@@ -24,14 +24,14 @@ from pymouse import PyMouse
 from pymouse import PyMouseEvent
 
 def saveLog(filename, logData):
-	try:
-		#Save computation time in a log file
-		text_file = open(filename, "r+")
-		text_file.readlines()
-		text_file.write("%s\n" % logData)
-		text_file.close()
-	except:
-		print("Failed writing log data to .txt file")
+	# try:
+	#Save computation time in a log file
+	text_file = open(filename, "r+")
+	text_file.readlines()
+	text_file.write("%s\n" % logData)
+	text_file.close()
+	# except:
+	# 	print("Failed writing log data to .txt file")
 
 class MouseActions(PyMouseEvent):
     def __init__(self):
@@ -89,7 +89,7 @@ def SendValueToArduino(NewVoltage):
 	# ser.flushInput()
 	# ser.flushOutput() 
 
-	print('Sending New Voltage to Arduino:' + str(round(NewVoltage,2)))
+	# print('Sending New Voltage to Arduino:' + str(round(NewVoltage,2)))
 
 	ser.write(str(round(NewVoltage,2)))
 
@@ -108,6 +108,12 @@ def CalculateNewVoltage(mean_intensity, SetPointIntensity, CurrentVoltage):
     # Calculate Percent Difference using current screen intensity and set point intenstity
     percentdifference = (mean_intensity - SetPointIntensity)/SetPointIntensity;
     NewVoltage = (1 - percentdifference/10)*CurrentVoltage;
+
+    # Maximum voltage on the arduino is 5 volts
+    if NewVoltage > 5:
+    	NewVoltage = 5
+    elif NewVoltage <0:
+    	NewVoltage = 0
 
     return NewVoltage
 
@@ -164,36 +170,47 @@ if __name__ == "__main__":
 
 	SetPointIntensity = raw_input("Set Point Intensity: ")
 	SetPointIntensity = float(SetPointIntensity)
+
+	ShowImageFlag = raw_input("Show Image of Box? (yes/no): ")
+	if ShowImageFlag == 'yes':
+		ShowImageFlag = True
+	else:
+		ShowImageFlag = False
 	
 	print(' ')
 	print('Initial Voltage set to ' + str(CurrentVoltage))
 	print('Set Point Intensity set to ' + str(SetPointIntensity))
+	print('Showing image set to ' + str(ShowImageFlag))
 	print(' ')
 
 	
 	BoxCoordinates = GetBoxCoordinates()
+	print(' ')
+	print('Running...')
 
 	its = 0
+	start_time = time.time()
+
 	while True:
-		start_time = time.time()
-
-		mean_intensity = GetMeanIntensity(BoxCoordinates, iteration=its, ShowImage=False)
-		print(round(mean_intensity,1))
-
+		mean_intensity = GetMeanIntensity(BoxCoordinates, iteration=its, ShowImage=ShowImageFlag)
 		newVoltage = CalculateNewVoltage(mean_intensity, SetPointIntensity, CurrentVoltage)
 
 		SendValueToArduino(newVoltage)
 
-		elapsed_time = time.time() - start_time
-		
-		logData = (mean_intensity, newVoltage, elapsed_time)
+		# Voltage read on arduino is 0.06 less than this number
+		newVoltage = newVoltage - 0.06
+
+		print('Mean Intensity: ' + str(round(mean_intensity,2)))
+		print('Current Voltage: ' + str(round(newVoltage,2)))
+
+		elapsed_time = round(time.time() - start_time, 2)
+
+		logData = [round(mean_intensity,2), round(newVoltage,2), elapsed_time]
+
 
 		saveLog('OutputValues.txt', logData)
+		print('Elapsed Time: ' + str(elapsed_time))
 
-
-		
-
-		print('Elapsed Time: ' + str(round(elapsed_time, 1)))
 		its = its + 1
 
 
