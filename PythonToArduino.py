@@ -1,7 +1,6 @@
 # pip install Image
 # pip install pyscreenshot
 # pip install pySerial
-
 # pip install pymouse
 # pip install pyobjc-framework-Quartz
 
