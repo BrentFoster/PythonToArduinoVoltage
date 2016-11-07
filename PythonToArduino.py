@@ -130,19 +130,14 @@ def GetMeanIntensity(BoxCoordinates, iteration=1, ShowImage=False):
 	width  = 2*abs(BoxCoordinates[0,0] - BoxCoordinates[1,0])
 	height = 2*abs(BoxCoordinates[0,1] - BoxCoordinates[1,1])
 
-	print('Box Width: ' + str(width))
-	print('Box Height: ' + str(height))
-
 	x = BoxCoordinates[0,1]*2
 	y = BoxCoordinates[0,0]*2
-
-	print(' ')
-	print('x: ' + str(x))
-	print('y: ' + str(y))
 
 	# Ignore the alpha channel for the mean intensity
 	gray_image_box = gray[x:x+height, 
 						  y:y+width, 0:3]
+
+	mean_intensity = np.mean(gray_image_box)
 
 	if ShowImage == True:	
 		# Only show the screen shot for the first iteration
@@ -150,7 +145,11 @@ def GetMeanIntensity(BoxCoordinates, iteration=1, ShowImage=False):
 			img = Image.fromarray(gray_image_box)
 			img.show()
 
-	mean_intensity = np.mean(gray_image_box)
+	if iteration ==0:
+		print('Box Width: ' + str(width))
+		print('Box Height: ' + str(height))
+
+	
 
 	return mean_intensity
 
@@ -197,8 +196,8 @@ if __name__ == "__main__":
 
 		SendValueToArduino(newVoltage)
 
-		# Voltage read on arduino is 0.06 less than this number
-		newVoltage = newVoltage - 0.06
+		# Voltage read on arduino is 0.03 less than this number
+		newVoltage = newVoltage - 0.03
 
 		print('Mean Intensity: ' + str(round(mean_intensity,2)))
 		print('Current Voltage: ' + str(round(newVoltage,2)))
@@ -212,6 +211,7 @@ if __name__ == "__main__":
 		print('Elapsed Time: ' + str(elapsed_time))
 
 		its = its + 1
+		print(' ')
 
 
 
