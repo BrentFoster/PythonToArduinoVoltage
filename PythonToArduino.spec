@@ -4,9 +4,9 @@ block_cipher = None
 
 
 a = Analysis(['PythonToArduino.py'],
-             pathex=['/Users/Brent/Documents/Arduino/Zidong Voltage/Zidong_Nov_5_2016'],
-             binaries=None,
-             datas=None,
+             pathex=['C:\\Users\\Brent\\GitRepositories\\Zidong\\PythonToArduinoVoltage'],
+             binaries=[],
+             datas=[],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],

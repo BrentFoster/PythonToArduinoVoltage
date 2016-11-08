@@ -15,6 +15,8 @@ from PIL import Image
 import time
 import sys
 
+# Needed to show image screenshot in Windows
+import webbrowser
 
 import serial 
 # import struct
@@ -97,9 +99,18 @@ def SendValueToArduino(NewVoltage):
 	time.sleep(0.5)
 
 def rgb2gray(image):
-	RGB_Image = np.asarray(image)
+	RGB_Image = np.asarray(image, dtype=np.uint8)
+	
+	#RGB_Image = abs(np.fft.rfft2(RGB_Image,axes=(0,1)))
+	# RGB_Image = np.uint32(RGB_Image)
+	#RGB_Image.reshape(RGB_Image.shape[:-1])
 
-	RGB_Image.view(dtype=np.uint32).reshape(RGB_Image.shape[:-1])
+
+	#RGB_Image.view(dtype=np.uint32).reshape(RGB_Image.shape[:-1])
+
+	#RGB_Image = np.array(RGB_Image).transpose((1, 0, 2))
+
+	print(RGB_Image.shape)
 
 	return RGB_Image
 
@@ -126,11 +137,13 @@ def GetMeanIntensity(BoxCoordinates, ShowImage=False):
 	# Index the gray scale image to include only the user defined box
 	BoxCoordinates = np.asarray(BoxCoordinates, dtype=np.int16)
 
-	width  = 2*abs(BoxCoordinates[0,0] - BoxCoordinates[1,0])
-	height = 2*abs(BoxCoordinates[0,1] - BoxCoordinates[1,1])
+	scale = 1
 
-	x = BoxCoordinates[0,1]*2
-	y = BoxCoordinates[0,0]*2
+	width  = scale*abs(BoxCoordinates[0,0] - BoxCoordinates[1,0])
+	height = scale*abs(BoxCoordinates[0,1] - BoxCoordinates[1,1])
+
+	x = BoxCoordinates[0,1]*scale
+	y = BoxCoordinates[0,0]*scale
 
 	# Ignore the alpha channel for the mean intensity
 	gray_image_box = gray[x:x+height, 
@@ -138,9 +151,12 @@ def GetMeanIntensity(BoxCoordinates, ShowImage=False):
 
 	mean_intensity = np.mean(gray_image_box)
 
-	if ShowImage == True:	
+	if ShowImage == True:
 		img = Image.fromarray(gray_image_box)
-		img.show()
+		img.save('initial_box.jpg')
+		webbrowser.open('initial_box.jpg')		
+		# img.show()
+
 
 		print('Box Width: ' + str(width))
 		print('Box Height: ' + str(height))
