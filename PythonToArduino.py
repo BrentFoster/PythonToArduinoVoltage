@@ -103,20 +103,20 @@ def rgb2gray(image):
 
 	return RGB_Image
 
-def CalculateNewVoltage(mean_intensity, SetPointIntensity, CurrentVoltage):
+def CalculateNewVoltage(mean_intensity, SetPointIntensity, CurrentVoltage, ScalingFactor):
     # Calculate Percent Difference using current screen intensity and set point intenstity
     percentdifference = (mean_intensity - SetPointIntensity)/SetPointIntensity;
-    NewVoltage = (1 - percentdifference/10)*CurrentVoltage;
+    NewVoltage = (1 - percentdifference/ScalingFactor)*CurrentVoltage;
 
     # Maximum voltage on the arduino is 5 volts
     if NewVoltage > 5:
     	NewVoltage = 5
-    elif NewVoltage <0:
+    elif NewVoltage < 0:
     	NewVoltage = 0
 
     return NewVoltage
 
-def GetMeanIntensity(BoxCoordinates, iteration=1, ShowImage=False):
+def GetMeanIntensity(BoxCoordinates, ShowImage=False):
 	# Get a new screen shot of the computer screen
 	img=ImageGrab.grab()
 	
@@ -139,12 +139,9 @@ def GetMeanIntensity(BoxCoordinates, iteration=1, ShowImage=False):
 	mean_intensity = np.mean(gray_image_box)
 
 	if ShowImage == True:	
-		# Only show the screen shot for the first iteration
-		if iteration == 0:	
-			img = Image.fromarray(gray_image_box)
-			img.show()
+		img = Image.fromarray(gray_image_box)
+		img.show()
 
-	if iteration ==0:
 		print('Box Width: ' + str(width))
 		print('Box Height: ' + str(height))
 
@@ -153,9 +150,6 @@ def GetMeanIntensity(BoxCoordinates, iteration=1, ShowImage=False):
 	return mean_intensity
 
 if __name__ == "__main__":
-
-	ser = serial.Serial('/dev/tty.usbmodem1421', 115200)
-
 
 	# for i in range(0,200):
 	# 	SendValueToArduino(1.123456)
@@ -175,23 +169,42 @@ if __name__ == "__main__":
 	else:
 		ShowImageFlag = False
 	
+
+	ScalingFactor = raw_input("Set Scaling Factor (~10): ")
+	ScalingFactor = float(ScalingFactor)
+
+	
 	print(' ')
 	print('Initial Voltage set to ' + str(CurrentVoltage))
 	print('Set Point Intensity set to ' + str(SetPointIntensity))
 	print('Showing image set to ' + str(ShowImageFlag))
+	print('Scaling Factor set to ' + str(ScalingFactor))
 	print(' ')
 
 	
 	BoxCoordinates = GetBoxCoordinates()
+
+	if ShowImageFlag == True:
+		# Show the screen shot now
+		GetMeanIntensity(BoxCoordinates, ShowImage=ShowImageFlag)
+
+
+
 	print(' ')
 	print('Running...')
 
 	its = 0
 	start_time = time.time()
 
+	try:
+		ser = serial.Serial('/dev/tty.usbmodem1421', 115200)
+	except: 
+		raise Exception("Could not connect to Arduino. Make sure the serial monitor is closed. Alternatively check that the arduino is plugged in and that you pressed the on button.")
+
+
 	while True:
-		mean_intensity = GetMeanIntensity(BoxCoordinates, iteration=its, ShowImage=ShowImageFlag)
-		newVoltage = CalculateNewVoltage(mean_intensity, SetPointIntensity, CurrentVoltage)
+		mean_intensity = GetMeanIntensity(BoxCoordinates, ShowImage=False)
+		newVoltage = CalculateNewVoltage(mean_intensity, SetPointIntensity, CurrentVoltage, ScalingFactor)
 
 		SendValueToArduino(newVoltage)
 
