@@ -213,7 +213,8 @@ if __name__ == "__main__":
 	start_time = time.time()
 
 	try:
-		ser = serial.Serial('/dev/tty.usbmodem1421', 115200)
+		#ser = serial.Serial('/dev/tty.usbmodem1421', 115200)
+		ser = serial.Serial('COM3', 115200)
 	except: 
 		raise Exception("Could not connect to Arduino. Make sure the serial monitor is closed. Alternatively check that the arduino is plugged in and that you pressed the on button.")
 
