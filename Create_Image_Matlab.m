@@ -11,7 +11,7 @@ while true
 
         image(img)
         title(i)
-        pause(0.6)   
+        pause(0.01)   
 
     end
 
@@ -23,7 +23,7 @@ while true
 
         image(img)
         title(i)
-        pause(0.6)   
+        pause(0.01)   
 
     end
 end
